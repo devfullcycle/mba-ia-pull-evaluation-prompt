@@ -23,7 +23,7 @@ python src/evaluate.py
 
 Executando avaliação dos prompts...
 ================================
-Prompt: support_bot_v1a
+Prompt: bug_to_user_story_v1
 - Helpfulness: 0.45
 - Correctness: 0.52
 - F1-Score: 0.48
@@ -40,7 +40,7 @@ python src/evaluate.py
 
 Executando avaliação dos prompts...
 ================================
-Prompt: support_bot_v2_optimized
+Prompt: bug_to_user_story_v2
 - Helpfulness: 0.94
 - Correctness: 0.96
 - F1-Score: 0.93
@@ -159,15 +159,16 @@ Após refatorar os prompts, você deve enviá-los de volta ao LangSmith Prompt H
 ### Critério de Aprovação:
 
 ```
-- Tone Score >= 0.9
-- Acceptance Criteria Score >= 0.9
-- User Story Format Score >= 0.9
-- Completeness Score >= 0.9
+- Helpfulness >= 0.9
+- Correctness >= 0.9
+- F1-Score >= 0.9
+- Clarity >= 0.9
+- Precision >= 0.9
 
-MÉDIA das 4 métricas >= 0.9
+MÉDIA das 5 métricas >= 0.9
 ```
 
-**IMPORTANTE:** TODAS as 4 métricas devem estar >= 0.9, não apenas a média!
+**IMPORTANTE:** A aprovação não é baseada em média! Se apenas uma das métricas ficar abaixo de 0.9 (ex: 0.85), você deve refatorar seu prompt e iterar novamente.
 
 ### 5. Testes de Validação
 
@@ -219,8 +220,8 @@ desafio-prompt-engineer/
 
 - `prompts/bug_to_user_story_v2.yml` - Seu prompt otimizado
 - `tests/test_prompts.py` - Seus testes de validação
-- `src/pull_prompt.py` Script de pull do repositório da fullcycle
-- `src/push_prompt.py` Script de push para o seu repositório
+- `src/pull_prompts.py` Script de pull do repositório da fullcycle
+- `src/push_prompts.py` Script de push para o seu repositório
 - `README.md` - Documentação do seu processo de otimização
 
 **O que já vem pronto:**
@@ -265,7 +266,7 @@ Edite manualmente o arquivo `prompts/bug_to_user_story_v2.yml` aplicando as téc
 python src/push_prompts.py
 ```
 
-### 5. Executar avaliação
+### 4. Executar avaliação
 
 ```bash
 python src/evaluate.py
@@ -301,14 +302,14 @@ python src/evaluate.py
    - Pré-requisitos e dependências
    - Comandos para cada fase do projeto
 
-3. **Evidências no LangSmith**:
+   D) **Evidências no LangSmith**:
+
    - Link público (ou screenshots) do dashboard do LangSmith
    - Devem estar visíveis:
-
-     - Dataset de avaliação com ≥ 20 exemplos
-     - Execuções dos prompts v1 (ruins) com notas baixas
-     - Execuções dos prompts v2 (otimizados) com notas ≥ 0.9
-     - Tracing detalhado de pelo menos 3 exemplos
+   - Dataset de avaliação com ≥ 15 exemplos
+   - Execuções dos prompts v1 (ruins) com notas baixas
+   - Execuções dos prompts v2 (otimizados) com notas ≥ 0.9
+   - Tracing detalhado de pelo menos 3 exemplos
 
 ---
 
