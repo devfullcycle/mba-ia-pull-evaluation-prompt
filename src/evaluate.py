@@ -20,6 +20,7 @@ Configure o provider no arquivo .env através da variável LLM_PROVIDER.
 import os
 import sys
 import json
+import argparse
 from typing import List, Dict, Any
 from pathlib import Path
 from dotenv import load_dotenv
@@ -271,6 +272,10 @@ def display_results(prompt_name: str, scores: Dict[str, float]) -> bool:
 
 
 def main():
+    parser = argparse.ArgumentParser(description="Avaliação de prompts via LangSmith")
+    parser.add_argument("--original", action="store_true", help="Avaliar a versão v1 (original) em vez da v2")
+    args = parser.parse_args()
+
     print_section_header("AVALIAÇÃO DE PROMPTS OTIMIZADOS")
 
     provider = os.getenv("LLM_PROVIDER", "openai")
@@ -310,9 +315,8 @@ def main():
     print("Certifique-se de ter feito push dos prompts antes de avaliar:")
     print("  python src/push_prompts.py\n")
 
-    prompts_to_evaluate = [
-        "bug_to_user_story_v2",
-    ]
+    version = "v1" if args.original else "v2"
+    prompts_to_evaluate = [f"bug_to_user_story_{version}"]
 
     all_passed = True
     evaluated_count = 0
