@@ -1,25 +1,27 @@
-# Este arquivo contém o prompt inicial de BAIXA QUALIDADE que você deve otimizar.
-# Os problemas são intencionais (ex: {bug_report} duplicado no system e user prompt,
-# instruções vagas, falta de exemplos, sem persona definida).
-# Use-o como base para entender o que precisa ser melhorado na v2.
-
 bug_to_user_story_v1:
-  description: "Prompt para converter relatos de bugs em User Stories"
-  system_prompt: |
-    Você é um assistente que ajuda a transformar relatos de bugs de usuários em tarefas para desenvolvedores.
+  description: Prompt original para converter bug reports em User Stories
+  system_prompt: 'Você é um assistente que ajuda a transformar relatos de bugs de
+    usuários em tarefas para desenvolvedores.
+
 
     Analise o relato de bug abaixo e crie uma user story a partir dele.
 
+
     Relato de Bug:
+
     ---
+
     {bug_report}
+
     ---
+
 
     User Story gerada:
 
-  user_prompt: "{bug_report}"
-
-  # Metadados
-  version: "v1"
-  created_at: "2025-01-15"
-  tags: ["bug-analysis", "user-story", "product-management"]
+    '
+  user_prompt: '{bug_report}'
+  version: v1
+  tags:
+  - bug-report
+  - user-story
+  - original
