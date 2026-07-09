@@ -334,3 +334,140 @@ python src/evaluate.py
 - **Não altere os datasets de avaliação** - apenas os prompts em `prompts/bug_to_user_story_v2.yml`
 - **Itere, itere, itere** - é normal precisar de 3-5 iterações para atingir 0.8 em todas as métricas
 - **Documente seu processo** - a jornada de otimização é tão importante quanto o resultado final
+
+---
+
+# Documentação da Solução
+
+## Técnicas Aplicadas (Fase 2)
+
+Para refatorar o prompt `bug_to_user_story_v1` (baixa qualidade) na versão otimizada `v2`, foram combinadas **três técnicas** de Prompt Engineering:
+
+### 1. Role Prompting
+
+**O que é:** definir uma persona e um contexto detalhado para o modelo.
+
+**Por que escolhi:** o prompt v1 usava um "assistente" genérico, sem especialização. Ao posicionar o modelo como um **Product Manager sênior especializado em Scrum e User Stories**, ele passa a adotar o vocabulário, a estrutura e os padrões de qualidade esperados de documentação ágil — o que impacta diretamente as métricas de *Clarity* e *Precision*.
+
+**Como apliquei (trecho do `system_prompt`):**
+```
+Você é um Product Manager sênior especializado em metodologias ágeis (Scrum)
+e em escrever User Stories de altíssima qualidade a partir de relatos de bugs.
+```
+
+### 2. Few-shot Learning (obrigatória)
+
+**O que é:** fornecer exemplos claros de entrada → saída para o modelo aprender o padrão desejado.
+
+**Por que escolhi:** foi a mudança de maior impacto. O v1 não tinha nenhum exemplo, então a formatação da saída era imprevisível. Com **3 exemplos** no formato exato esperado (*"Como um... eu quero... para que..."* + *Critérios de Aceitação* em Dado/Quando/Então), o modelo passa a replicar a estrutura de forma consistente, elevando *F1-Score* e *Correctness* (que comparam a saída com a referência do dataset).
+
+**Como apliquei:** seção `## Exemplos (Few-shot)` no `system_prompt` com 3 pares Bug Report → User Story, cobrindo domínios variados (e-commerce, validação/SaaS e mobile/iOS).
+
+### 3. Chain of Thought (CoT)
+
+**O que é:** instruir o modelo a raciocinar passo a passo antes de responder.
+
+**Por que escolhi:** converter um bug em User Story exige decompor o problema (persona → ação → valor → critérios). O CoT guia esse raciocínio, melhorando a completude e a precisão dos critérios de aceitação. Para não poluir a saída (o que prejudicaria *Clarity/Precision*), o raciocínio é feito **internamente** — o prompt instrui explicitamente a retornar **apenas** a User Story final.
+
+**Como apliquei (trecho do `system_prompt`):**
+```
+Antes de escrever, pense passo a passo INTERNAMENTE (não inclua este raciocínio
+na resposta final):
+1. Identifique QUEM é o usuário afetado pelo bug (a persona específica).
+2. Identifique O QUE o usuário deseja fazer (o comportamento correto esperado).
+3. Identifique PARA QUE serve (o valor de negócio / benefício).
+4. Derive os critérios de aceitação testáveis.
+5. Considere edge cases e validações relevantes.
+```
+
+Além das técnicas, o v2 traz **regras explícitas de comportamento**, **tratamento de edge cases** (bug vago, múltiplos problemas, ausência de persona), **separação clara entre System e User Prompt** e **exigência de formato Markdown**.
+
+---
+
+## Resultados Finais
+
+### Tabela comparativa: v1 (ruim) vs v2 (otimizado)
+
+| Métrica       | v1 (baixa qualidade)* | v2 (otimizado) | Meta   |
+|---------------|:---------------------:|:--------------:|:------:|
+| Helpfulness   | 0.45 ✗                | 0.95 ✓         | ≥ 0.80 |
+| Correctness   | 0.52 ✗                | 0.92 ✓         | ≥ 0.80 |
+| F1-Score      | 0.48 ✗                | 0.87 ✓         | ≥ 0.80 |
+| Clarity       | 0.50 ✗                | 0.94 ✓         | ≥ 0.80 |
+| Precision     | 0.46 ✗                | 0.96 ✓         | ≥ 0.80 |
+| **Média**     | ~0.48                 | **0.9264**     |        |
+| **Status**    | ❌ REPROVADO          | ✅ APROVADO    |        |
+
+\* Números de v1 são ilustrativos (baseline do enunciado do desafio). Os de v2 são reais, do `python src/evaluate.py` com `EVAL_MODEL=gemini-2.5-flash`.
+
+**Jornada de otimização (F1-Score):** 0.79 (base) → 0.77 (tentativa de concisão — piorou) → **0.87** (escalonamento por complexidade). A descoberta-chave foi que as referências do dataset escalam com a complexidade do bug (simples ≈ 5 critérios, médios 8-13, complexos 40+ com estrutura expandida); fazer o prompt detectar a complexidade e ajustar a profundidade da saída foi o que destravou o F1.
+
+### Evidências no LangSmith (links públicos)
+
+- **Dataset de avaliação (15 exemplos):** https://smith.langchain.com/public/e265f89c-e992-48fd-85f2-fbd59e0c2407/d
+- **Tracing detalhado (3 exemplos):**
+  - https://smith.langchain.com/public/fc87c018-d163-4aad-91ae-807290d205be/r
+  - https://smith.langchain.com/public/c104cc1c-a826-4033-bccd-e204ebf61c15/r
+  - https://smith.langchain.com/public/4fac5355-0c87-4365-8408-61363682450f/r
+- **Prompt v2:** publicado no LangSmith Hub como `bug_to_user_story_v2` (`is_public: true`).
+- **Screenshots:** _adicione aqui os prints das avaliações com todas as métricas ≥ 0.8 (execute `python src/evaluate.py` e capture a tela do STATUS APROVADO)._
+
+---
+
+## Como Executar
+
+### Pré-requisitos
+
+- Python 3.9+
+- Conta no [LangSmith](https://smith.langchain.com/) com API Key
+- API Key de um provider de LLM:
+  - **Google Gemini (free):** https://aistudio.google.com/app/apikey — usado neste projeto
+
+### 1. Ambiente virtual e dependências
+
+```bash
+python -m venv venv
+source venv/bin/activate      # Windows: venv\Scripts\activate
+pip install -r requirements.txt
+```
+
+### 2. Variáveis de ambiente
+
+Copie `.env.example` para `.env` e preencha:
+
+```bash
+cp .env.example .env
+```
+
+```env
+LANGSMITH_API_KEY=<sua_chave_langsmith>
+LANGSMITH_PROJECT=prompt-optimization-challenge
+USERNAME_LANGSMITH_HUB=<seu_username_do_hub>
+GOOGLE_API_KEY=<sua_chave_google>
+
+LLM_PROVIDER=google
+LLM_MODEL=gemini-2.5-flash
+EVAL_MODEL=gemini-2.5-flash
+```
+
+> Para descobrir seu `USERNAME_LANGSMITH_HUB`: publique qualquer prompt, abra-o e clique no ícone de cadeado (🔒).
+
+### 3. Fluxo completo
+
+```bash
+# 1) Pull do prompt ruim (v1) do LangSmith Hub -> prompts/bug_to_user_story_v1.yml
+python src/pull_prompts.py
+
+# 2) (o prompt otimizado já está em prompts/bug_to_user_story_v2.yml)
+
+# 3) Push do prompt v2 (público) para o seu LangSmith Hub
+python src/push_prompts.py
+
+# 4) Avaliação: puxa o v2 do Hub, roda contra os 15 exemplos e calcula as 5 métricas
+python src/evaluate.py
+
+# 5) Testes de validação do prompt
+pytest tests/test_prompts.py -v
+```
+
+Repita os passos **3 → 4** editando `prompts/bug_to_user_story_v2.yml` até todas as métricas atingirem ≥ 0.8.
