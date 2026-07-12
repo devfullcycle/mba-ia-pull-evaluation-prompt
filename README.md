@@ -111,6 +111,9 @@ com `EVAL_MODEL=gemini-2.5-flash`.
 
 ### Screenshots
 
+**Avaliação `src/evaluate.py` — todas as 5 métricas ≥ 0.8 (STATUS: APROVADO)**
+![Terminal da avaliação aprovada](docs/img/evaluate-terminal.png)
+
 **Prompt v2 publicado (público) no LangSmith Hub**
 ![Prompt v2 no Hub](docs/img/prompt-hub.png)
 
