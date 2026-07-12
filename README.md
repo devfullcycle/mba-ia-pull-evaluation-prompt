@@ -404,7 +404,9 @@ Além das técnicas, o v2 traz **regras explícitas de comportamento**, **tratam
 
 ### Evidências no LangSmith (links públicos)
 
-- **Dataset de avaliação (15 exemplos):** https://smith.langchain.com/public/e265f89c-e992-48fd-85f2-fbd59e0c2407/d
+- **Dashboard público (dataset de 15 exemplos + experimento com as 5 métricas):** https://smith.langchain.com/public/e265f89c-e992-48fd-85f2-fbd59e0c2407/d
+  - Abra a aba **Experiments** → `bug_to_user_story_v2-...` para ver os scores por métrica (todas ≥ 0.8).
+  - O experimento é gerado por `src/run_experiment.py` (via `langsmith.evaluate`), que reutiliza as mesmas métricas de `src/metrics.py`.
 - **Tracing detalhado (3 exemplos):**
   - https://smith.langchain.com/public/fc87c018-d163-4aad-91ae-807290d205be/r
   - https://smith.langchain.com/public/c104cc1c-a826-4033-bccd-e204ebf61c15/r
