@@ -117,6 +117,26 @@ O repositório base já contém prompts de **baixa qualidade** publicados no Lan
 
 ---
 
+#### Implementação do pull
+
+O script `src/pull_prompts.py` utiliza o Prompt Hub do LangSmith para baixar o prompt base `leonanluppi/bug_to_user_story_v1` e salvá-lo localmente em formato YAML.
+
+A implementação segue uma estrutura simples:
+
+- valida as credenciais mínimas no `.env`;
+- executa o pull do prompt no LangSmith;
+- extrai os templates de `system` e `user`;
+- grava o arquivo em `prompts/bug_to_user_story_v1.yml`;
+- retorna código de saída `0` em caso de sucesso e `1` em caso de falha.
+
+Comando utilizado:
+
+```bash
+python src/pull_prompts.py
+```
+
+---
+
 ### 2. Otimização do Prompt
 
 Agora que você tem o prompt inicial, é hora de refatorá-lo usando as técnicas de prompt aprendidas no curso.
