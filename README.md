@@ -170,8 +170,8 @@ O arquivo `prompts/bug_to_user_story_v2.yml` foi criado a partir da análise do 
 Na versão otimizada, foram aplicadas as seguintes técnicas:
 
 - **Role Prompting:** persona de Product Manager sênior, responsável por transformar relatos de bugs em histórias úteis para um time ágil.
-- **Few-shot Learning:** dois exemplos completos de entrada e saída, cobrindo um bug simples de validação e um bug de permissão com severidade alta.
-- **Skeleton of Thought:** formato fixo com título, user story, critérios de aceitação e contexto técnico quando necessário.
+- **Few-shot Learning:** exemplos completos de entrada e saída, cobrindo carrinho, validação de formulário, permissão, UI mobile, dashboard e navegador.
+- **Skeleton of Thought:** formato fixo com user story, critérios de aceitação e contexto técnico quando necessário.
 - **Edge Case Handling:** orientações diretas para validação, permissão, performance, concorrência e UI.
 
 A separação entre `system_prompt` e `user_prompt` também foi ajustada. O `system_prompt` concentra persona, regras, exemplos e formato de resposta. O `user_prompt` fica responsável apenas por receber o relato de bug em `{bug_report}`. A proposta foi manter o desafio simples e funcional, sem adicionar complexidade além do necessário para passar pela avaliação.
@@ -234,6 +234,36 @@ MÉDIA das 5 métricas >= 0.8
 ```
 
 **IMPORTANTE:** TODAS as 5 métricas devem estar >= 0.8, não apenas a média!
+
+#### Iteração inicial
+
+A primeira rodada parcial de avaliação indicou que o prompt estava claro e preciso, mas ainda poderia melhorar a cobertura das respostas em casos simples. O ajuste feito na versão `v2` foi manter a estrutura simples e reforçar três pontos:
+
+- critérios de aceitação objetivos para bugs simples;
+- preservação de validações e efeitos visíveis para o usuário;
+- inclusão de contexto técnico em casos médios, críticos ou com evidências específicas;
+- estrutura própria para relatos complexos com múltiplas áreas afetadas.
+
+Após o ajuste, o prompt foi publicado novamente no LangSmith para nova rodada de avaliação.
+
+Resultado final da avaliação:
+
+| Métrica | Resultado |
+| --- | ---: |
+| Helpfulness | 0.99 |
+| Correctness | 0.94 |
+| F1-Score | 0.89 |
+| Clarity | 0.99 |
+| Precision | 0.98 |
+| Média geral | 0.9568 |
+
+Status: aprovado, com todas as métricas acima de `0.8`.
+
+Comando utilizado na rodada final:
+
+```bash
+LLM_MODEL=gemini-3.1-pro-preview EVAL_MODEL=gemini-3.1-pro-preview python -u src/evaluate.py
+```
 
 ### 5. Testes de Validação
 
