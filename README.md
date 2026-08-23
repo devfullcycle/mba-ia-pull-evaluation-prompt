@@ -163,6 +163,21 @@ Agora que você tem o prompt inicial, é hora de refatorá-lo usando as técnica
 
 ---
 
+#### Implementação do prompt otimizado
+
+O arquivo `prompts/bug_to_user_story_v2.yml` foi criado a partir da análise do prompt inicial e dos estudos do repositório `devfullcycle/mba-ia-prompt-engineering`, principalmente os capítulos de tipos de prompts, versionamento em YAML e avaliação. A versão original era funcional, mas deixava margem para respostas vagas: repetia o relato no `system_prompt` e no `user_prompt`, não definia uma persona clara, não especificava formato de saída, não trazia exemplos e não orientava como lidar com cenários comuns de bugs.
+
+Na versão otimizada, foram aplicadas as seguintes técnicas:
+
+- **Role Prompting:** persona de Product Manager sênior, responsável por transformar relatos de bugs em histórias úteis para um time ágil.
+- **Few-shot Learning:** dois exemplos completos de entrada e saída, cobrindo um bug simples de validação e um bug de permissão com severidade alta.
+- **Skeleton of Thought:** formato fixo com título, user story, critérios de aceitação e contexto técnico quando necessário.
+- **Edge Case Handling:** orientações diretas para validação, permissão, performance, concorrência e UI.
+
+A separação entre `system_prompt` e `user_prompt` também foi ajustada. O `system_prompt` concentra persona, regras, exemplos e formato de resposta. O `user_prompt` fica responsável apenas por receber o relato de bug em `{bug_report}`. A proposta foi manter o desafio simples e funcional, sem adicionar complexidade além do necessário para passar pela avaliação.
+
+---
+
 ### 3. Push e Avaliação
 
 Após refatorar os prompts, você deve enviá-los de volta ao LangSmith Prompt Hub.
@@ -350,7 +365,7 @@ python src/evaluate.py
 - **Lembre-se da importância da especificidade, contexto e persona** ao refatorar prompts
 - **Use Few-shot Learning com 2-3 exemplos claros** para melhorar drasticamente a performance
 - **Chain of Thought (CoT)** é excelente para tarefas que exigem raciocínio complexo (como análise de bugs)
-- **Use o Tracing do LangSmith** como sua principal ferramenta de debug - ele mostra exatamente o que o LLM está "pensando"
+- **Use o Tracing do LangSmith** como sua principal ferramenta de debug para entender entradas, saídas e decisões de avaliação
 - **Não altere os datasets de avaliação** - apenas os prompts em `prompts/bug_to_user_story_v2.yml`
 - **Itere, itere, itere** - é normal precisar de 3-5 iterações para atingir 0.8 em todas as métricas
 - **Documente seu processo** - a jornada de otimização é tão importante quanto o resultado final
