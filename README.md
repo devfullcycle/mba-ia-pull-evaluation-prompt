@@ -284,6 +284,25 @@ pytest tests/test_prompts.py
 
 ---
 
+#### Implementação dos testes
+
+O arquivo `tests/test_prompts.py` valida o prompt otimizado de forma estática, sem executar chamadas externas. Os testes verificam:
+
+- presença de `system_prompt`;
+- definição de persona;
+- uso do formato de user story;
+- exemplos de entrada e saída;
+- ausência de `[TODO]`;
+- lista mínima de técnicas aplicadas no YAML.
+
+Comando utilizado:
+
+```bash
+pytest tests/test_prompts.py -v
+```
+
+---
+
 ## Estrutura obrigatória do projeto
 
 Faça um fork do repositório base: **[Clique aqui para o template](https://github.com/devfullcycle/mba-ia-pull-evaluation-prompt)**
