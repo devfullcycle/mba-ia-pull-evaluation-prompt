@@ -194,6 +194,26 @@ Após refatorar os prompts, você deve enviá-los de volta ao LangSmith Prompt H
 
 ---
 
+#### Implementação do push
+
+O script `src/push_prompts.py` lê o prompt otimizado em `prompts/bug_to_user_story_v2.yml`, monta um `ChatPromptTemplate` com as mensagens de `system` e `user`, e publica a versão `{USERNAME_LANGSMITH_HUB}/bug_to_user_story_v2` no LangSmith Prompt Hub.
+
+A implementação segue o mesmo padrão simples dos estudos de versionamento:
+
+- carrega o YAML local;
+- valida os campos obrigatórios;
+- monta o template de chat;
+- adiciona descrição, tags e técnicas aplicadas;
+- publica o prompt como público no LangSmith.
+
+Comando utilizado:
+
+```bash
+python src/push_prompts.py
+```
+
+---
+
 ### 4. Iteração
 
 - Espera-se 3-5 iterações.
