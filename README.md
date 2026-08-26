@@ -265,6 +265,34 @@ Comando utilizado na rodada final:
 LLM_MODEL=gemini-3.1-pro-preview EVAL_MODEL=gemini-3.1-pro-preview python -u src/evaluate.py
 ```
 
+#### Resultados finais e evidências
+
+Links de evidência:
+
+- Dashboard do projeto no LangSmith: [mba-ia-prompt-engineering](https://smith.langchain.com/o/49e09684-dd47-4398-b0e2-6692fb7a52d6/projects/p/32d13cba-ff4d-4546-ab8b-d1b51b301e7d)
+- Dataset público com os 15 exemplos: [mba-ia-prompt-engineering-eval](https://smith.langchain.com/public/cec05e3e-3e67-4bb5-818d-6d6ffe0471cd/d)
+- Prompt otimizado publicado: [aosdevelop/bug_to_user_story_v2](https://smith.langchain.com/prompts/bug_to_user_story_v2/bf6620d1?organizationId=49e09684-dd47-4398-b0e2-6692fb7a52d6)
+- Trace público 1: [bug simples](https://smith.langchain.com/public/44db931c-5827-4ecd-950d-add3b57d03f9/r)
+- Trace público 2: [bug médio](https://smith.langchain.com/public/58a58e20-b6e4-47fe-a56b-ffa59fd8b7a3/r)
+- Trace público 3: [bug complexo](https://smith.langchain.com/public/35989e0e-8aab-41b0-a44a-2b50111e1e32/r)
+
+Screenshot do dataset público:
+
+![Dataset público no LangSmith](docs/screenshots/langsmith-dataset-examples.png)
+
+Comparativo entre o prompt inicial e o prompt otimizado:
+
+| Métrica | v1 - prompt inicial | v2 - prompt otimizado | Evolução |
+| --- | ---: | ---: | ---: |
+| Helpfulness | 0.8977 | 0.99 | +0.0923 |
+| Correctness | 0.8018 | 0.94 | +0.1382 |
+| F1-Score | 0.6904 | 0.89 | +0.1996 |
+| Clarity | 0.8820 | 0.99 | +0.1080 |
+| Precision | 0.9133 | 0.98 | +0.0667 |
+| Média geral | 0.8370 | 0.9568 | +0.1198 |
+
+Observação: a avaliação de referência do `v2` foi executada na rodada final com `gemini-3.1-pro-preview`. Para reduzir custo, a medição complementar do `v1` foi executada com `gemini-2.5-flash`, usando o mesmo dataset local e as mesmas funções de métrica do projeto.
+
 ### 5. Testes de Validação
 
 **O que você deve fazer:** Edite o arquivo `tests/test_prompts.py` e implemente, no mínimo, os 6 testes abaixo usando `pytest`:
