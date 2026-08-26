@@ -46,5 +46,7 @@ ENV/
 
 # Project specific
 screenshots/
+!docs/screenshots/
+!docs/screenshots/*.png
 results/
 .claude/
