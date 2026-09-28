@@ -40,12 +40,20 @@ load_dotenv()
 
 
 def pull_prompts_from_langsmith():
-    ...
+    client = Client()
+    prompt = client.pull_prompt(
+        "leonanluppi/bug_to_user_story_v1",
+        dangerously_pull_public_prompt=True,
+    )
+    # print(prompt)
+    save_yaml(prompt, "prompts/raw_prompts.yml")
 
 
 def main():
     """Função principal"""
-    ...
+    print('Starting prompt pull process...')
+    pull_prompts_from_langsmith()
+    print('Prompt pull process completed.')
 
 
 if __name__ == "__main__":

@@ -1,0 +1,101 @@
+!!python/object:langchain_core.prompts.chat.ChatPromptTemplate
+__dict__:
+  name: null
+  input_variables:
+  - bug_report
+  optional_variables: []
+  input_types: {}
+  output_parser: null
+  partial_variables: {}
+  metadata:
+    lc_hub_owner: leonanluppi
+    lc_hub_repo: bug_to_user_story_v1
+    lc_hub_commit_hash: 2950c33dbd7ffaed2e440b50adfd7769d183f90faf0bae5aa4864354f88e4073
+  tags: null
+  messages:
+  - !!python/object:langchain_core.prompts.chat.SystemMessagePromptTemplate
+    __dict__:
+      prompt: !!python/object:langchain_core.prompts.prompt.PromptTemplate
+        __dict__:
+          name: null
+          input_variables:
+          - bug_report
+          optional_variables: []
+          input_types: {}
+          output_parser: null
+          partial_variables: {}
+          metadata: null
+          tags: null
+          template: 'Você é um assistente que ajuda a transformar relatos de bugs
+            de usuários em tarefas para desenvolvedores.
+
+
+            Analise o relato de bug abaixo e crie uma user story a partir dele.
+
+
+            Relato de Bug:
+
+            ---
+
+            {bug_report}
+
+            ---
+
+
+            User Story gerada:
+
+            '
+          template_format: f-string
+          validate_template: false
+        __pydantic_extra__: null
+        __pydantic_fields_set__: !!set
+          partial_variables: null
+          template: null
+          template_format: null
+          input_variables: null
+        __pydantic_private__: null
+      additional_kwargs: {}
+    __pydantic_extra__: null
+    __pydantic_fields_set__: !!set
+      prompt: null
+    __pydantic_private__:
+      _msg_class: !!python/name:langchain_core.messages.system.SystemMessage ''
+  - !!python/object:langchain_core.prompts.chat.HumanMessagePromptTemplate
+    __dict__:
+      prompt: !!python/object:langchain_core.prompts.prompt.PromptTemplate
+        __dict__:
+          name: null
+          input_variables:
+          - bug_report
+          optional_variables: []
+          input_types: {}
+          output_parser: null
+          partial_variables: {}
+          metadata: null
+          tags: null
+          template: '{bug_report}'
+          template_format: f-string
+          validate_template: false
+        __pydantic_extra__: null
+        __pydantic_fields_set__: !!set
+          partial_variables: null
+          template: null
+          template_format: null
+          input_variables: null
+        __pydantic_private__: null
+      additional_kwargs: {}
+    __pydantic_extra__: null
+    __pydantic_fields_set__: !!set
+      prompt: null
+    __pydantic_private__:
+      _msg_class: !!python/name:langchain_core.messages.human.HumanMessage ''
+  validate_template: false
+__pydantic_extra__: null
+__pydantic_fields_set__: !!set
+  messages: null
+  input_variables: null
+  input_types: null
+  metadata: null
+  optional_variables: null
+  partial_variables: null
+__pydantic_private__: null
