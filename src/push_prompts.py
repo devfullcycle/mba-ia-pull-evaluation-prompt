@@ -42,9 +42,19 @@ from dotenv import load_dotenv
 from langsmith import Client
 from langchain_core.prompts import ChatPromptTemplate
 from utils import load_yaml, check_env_vars, print_section_header
+from pydantic import BaseModel
 
 load_dotenv()
 
+username = os.getenv("USERNAME_LANGSMITH_HUB")
+
+class PromptInfo(BaseModel):
+    description: str
+    system_prompt: str
+    user_prompt: str
+    version: str
+    created_at: str
+    tags: list[str]
 
 def push_prompt_to_langsmith(prompt_name: str, prompt_data: dict) -> bool:
     """
@@ -57,7 +67,22 @@ def push_prompt_to_langsmith(prompt_name: str, prompt_data: dict) -> bool:
     Returns:
         True se sucesso, False caso contrário
     """
-    ...
+    client = Client()
+    prompt = ChatPromptTemplate.from_messages([
+        ("system", prompt_data["system_prompt"]),
+        ("user", prompt_data["user_prompt"]),
+    ])
+
+    # url = client.push_prompt(
+    #     f"{username}/bug_to_user_story_v2",
+    #     object=prompt,
+    #     is_public=True,
+    #     description=prompt_data["description"],
+    #     tags=prompt_data["tags"],
+    #     new_repo_is_public=True,
+    # )
+
+    # print(f"Prompt '{prompt_name}' enviado com sucesso para o LangSmith Hub: {url}")
 
 
 def validate_prompt(prompt_data: dict) -> tuple[bool, list]:
@@ -70,13 +95,28 @@ def validate_prompt(prompt_data: dict) -> tuple[bool, list]:
     Returns:
         (is_valid, errors) - Tupla com status e lista de erros
     """
-    ...
+    if len(prompt_data) != 1:
+        return False, ["O arquivo deve conter exatamente um prompt."]
+
+    prompt_data = next(iter(prompt_data.values()))  # Extrai o conteúdo do prompt
+    try:
+        PromptInfo(**prompt_data)
+        return True, []
+    except Exception as e:
+        return False, [str(e)]
 
 
 def main():
     """Função principal"""
-    ...
-
+    file = "prompts/bug_to_user_story_v2.yml"
+    prompt_dict = load_yaml(file)
+    is_valid, errors = validate_prompt(prompt_dict)
+    if not is_valid:
+        print(f"Erro de validação para {file.name}: {errors}")
+        return
+    prompt_name = next(iter(prompt_dict.keys()))  # Extrai o nome do prompt
+    push_prompt_to_langsmith(prompt_name, prompt_dict[prompt_name])  # Push para o Hub
+    print(f"Prompt '{prompt_name}' enviado com sucesso para o LangSmith Hub.")
 
 if __name__ == "__main__":
     sys.exit(main())
