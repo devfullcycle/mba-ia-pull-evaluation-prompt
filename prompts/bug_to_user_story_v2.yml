@@ -222,3 +222,8 @@ bug_to_user_story_v2:
   created_at: "2025-01-15"
   updated_at: "2026-10-01"
   tags: ["bug-analysis", "user-story", "product-management", "bdd"]
+  techniques_applied:
+    - "Role Prompting"
+    - "Few-shot Learning"
+    - "Chain of Thought"
+    - "Skeleton of Thought"

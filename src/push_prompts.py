@@ -42,7 +42,7 @@ from dotenv import load_dotenv
 from langsmith import Client
 from langchain_core.prompts import ChatPromptTemplate
 from utils import load_yaml, check_env_vars, print_section_header
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 load_dotenv()
 
@@ -55,6 +55,7 @@ class PromptInfo(BaseModel):
     version: str
     created_at: str
     tags: list[str]
+    techniques_applied: list[str] = Field(min_length=2)
 
 def push_prompt_to_langsmith(prompt_name: str, prompt_data: dict) -> bool:
     """
@@ -78,7 +79,9 @@ def push_prompt_to_langsmith(prompt_name: str, prompt_data: dict) -> bool:
         object=prompt,
         is_public=True,
         description=prompt_data["description"],
+        readme="## Técnicas aplicadas\n\n" + "\n".join(f"- {t}" for t in prompt_data["techniques_applied"]),
         tags=prompt_data["tags"],
+        commit_description=f"{prompt_data['version']} - técnicas: {', '.join(prompt_data['techniques_applied'])}",
     )
 
     print(f"Prompt '{prompt_name}' enviado com sucesso para o LangSmith Hub: {url}")

@@ -42,7 +42,11 @@ class TestPrompts:
 
     def test_prompt_no_todos(self):
         """Garante que você não esqueceu nenhum `[TODO]` no texto."""
-        pass
+        data = load_prompts("prompts/bug_to_user_story_v2.yml")  # Carrega o prompt para teste
+        prompt = next(iter(data.values()))  # Extrai o conteúdo do prompt
+
+        assert "[TODO]" not in prompt['system_prompt'], "O 'system_prompt' contém '[TODO]'"
+        assert "[TODO]" not in prompt['user_prompt'], "O 'user_prompt' contém '[TODO]'"
 
     def test_minimum_techniques(self):
         """Verifica (através dos metadados do yaml) se pelo menos 2 técnicas foram listadas."""
