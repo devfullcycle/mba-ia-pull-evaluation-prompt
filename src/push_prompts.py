@@ -73,16 +73,15 @@ def push_prompt_to_langsmith(prompt_name: str, prompt_data: dict) -> bool:
         ("user", prompt_data["user_prompt"]),
     ])
 
-    # url = client.push_prompt(
-    #     f"{username}/bug_to_user_story_v2",
-    #     object=prompt,
-    #     is_public=True,
-    #     description=prompt_data["description"],
-    #     tags=prompt_data["tags"],
-    #     new_repo_is_public=True,
-    # )
+    url = client.push_prompt(
+        f"{username}/bug_to_user_story_v2",
+        object=prompt,
+        is_public=True,
+        description=prompt_data["description"],
+        tags=prompt_data["tags"],
+    )
 
-    # print(f"Prompt '{prompt_name}' enviado com sucesso para o LangSmith Hub: {url}")
+    print(f"Prompt '{prompt_name}' enviado com sucesso para o LangSmith Hub: {url}")
 
 
 def validate_prompt(prompt_data: dict) -> tuple[bool, list]:
@@ -116,7 +115,6 @@ def main():
         return
     prompt_name = next(iter(prompt_dict.keys()))  # Extrai o nome do prompt
     push_prompt_to_langsmith(prompt_name, prompt_dict[prompt_name])  # Push para o Hub
-    print(f"Prompt '{prompt_name}' enviado com sucesso para o LangSmith Hub.")
 
 if __name__ == "__main__":
     sys.exit(main())
