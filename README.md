@@ -352,3 +352,7 @@ Rode uma vez e guarde o endereço: ao compartilhar de novo, o link muda.
 - Não altere os datasets de avaliação - apenas os prompts em prompts/bug_to_user_story_v2.yml
 - Itere, itere, itere - é normal precisar de 3-5 iterações para atingir 0.8 em todas as métricas
 - Documente seu processo - a jornada de otimização é tão importante quanto o resultado final
+
+## Entrega
+
+<img width="1341" height="835" alt="image" src="https://github.com/user-attachments/assets/650a996a-f894-4351-b405-92a352fd563e" />
