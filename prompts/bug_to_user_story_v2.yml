@@ -32,6 +32,7 @@ bug_to_user_story_v2:
     Passo 5 — Elaborar critérios de aceitação BDD:
       - Use SEMPRE o formato: "- Dado que... / - Quando... / - Então... / - E..."
       - Mínimo de 3 critérios; para bugs médios e complexos, inclua mais.
+      - Consulte o "Checklist por Tipo de Bug" para não esquecer critérios esperados.
 
     Passo 6 — Avaliar se contexto técnico é necessário:
       - Se o bug menciona logs, endpoints, SQL, stack traces, métricas de performance ou severidade → inclua uma seção "Contexto Técnico:" ao final.
@@ -112,10 +113,28 @@ bug_to_user_story_v2:
     - Adapte o nível de detalhe à complexidade do bug.
     - Preserve informações técnicas relevantes em seção separada quando aplicável.
     - Extraia termos técnicos, nomes de botões e mensagens de erro específicas diretamente do relato do bug para compor os Critérios de Aceitação
-    - Use apenas números, limites, tecnologias e ferramentas que aparecem no relato. Não crie SLAs, percentuais, nomes de bibliotecas ou tamanhos de lote que o relato não mencione.
+    - Separe FATOS de REQUISITOS:
+      - Fatos (estado atual, números observados, causas, tecnologias e ferramentas em uso): use somente o que está no relato. Nunca invente volumes, quantidades de usuários, bibliotecas ou arquiteturas.
+      - Requisitos (comportamento esperado após a correção): devem ser concretos e verificáveis. Não use expressões vagas como "dentro do tempo esperado" ou "sem lentidão".
+      - Essa separação orienta o conteúdo; não escreva os rótulos "Fato" ou "Requisito" na resposta.
+    - Em bugs de desempenho, o critério "Então" deve conter uma meta numérica de tempo claramente melhor que a situação atual relatada (ex: atual >120s → "em menos de 30 segundos"; travamento de 5-10s → "em menos de 2 segundos").
+    - Quando o relato aponta a causa do problema em bugs médios ou complexos, inclua a correção correspondente no contexto técnico (ex: falta de índice → "Sugestão: adicionar índice na coluna").
+    - Bugs SIMPLES não têm seção de contexto técnico, mesmo que o relato cite números ou causas.
+    - Em bugs médios, use um único bloco Dado/Quando/Então/E com 5 a 7 critérios; não repita blocos com a mesma ideia. Requisitos de implementação vão em uma seção "Critérios Técnicos:" antes do contexto técnico.
+    - Escreva os critérios pelo resultado esperado, não pela ausência do erro (ex: "deve retornar HTTP 200" em vez de "não deve retornar HTTP 500").
+
+    ## Checklist por Tipo de Bug:
+    Ao escrever os critérios, verifique quais itens abaixo se aplicam ao bug e inclua os pertinentes:
+    - Desempenho: meta de tempo mensurável, ausência de travamento/timeout e critérios técnicos para a causa relatada (ex: paginação, processamento em segundo plano, índice).
+    - Interface/UI: elemento visível e utilizável no cenário relatado, responsividade e acessibilidade quando houver interação (foco no elemento, fechar com ESC, área clicável).
+    - Integração/pagamento: resposta de sucesso esperada (código HTTP), atualização do status, notificação ao usuário e registro em log para auditoria.
+    - Contagem/métrica/cálculo: regra exata do cálculo ou do filtro (ex: considerar apenas registros com status "ativo"), consistência entre telas e atualização dos valores.
+    - Segurança/permissão: resposta para acesso negado (ex: HTTP 403), acesso permitido para quem tem permissão e registro em log de auditoria.
+    - Validação de dados: mensagem de erro clara, bloqueio da ação inválida e orientação sobre o formato correto.
+    Em bugs SIMPLES, use o checklist apenas para escolher os 5 critérios mais relevantes, sem criar seções extras.
 
     ## Casos Especiais:
-    - Relato vago ou muito curto: gere a User Story com o que o relato informa, usando critérios genéricos e verificáveis, sem inventar detalhes para preencher lacunas.
+    - Relato vago ou muito curto (sem contexto, causa ou cenário claros): gere a User Story com o que o relato informa e critérios verificáveis do comportamento esperado, sem supor causas técnicas que o relato não indica.
     - Relato que descreve uma funcionalidade nova e não um defeito: gere a User Story normalmente, focando no comportamento desejado.
     - Relato com vários problemas: trate como bug complexo e crie uma seção de critérios para cada problema.
     - Persona não identificável: use "usuário do sistema"; se o problema não tem interação direta do usuário (integração, processamento interno), use "o sistema".
@@ -129,81 +148,109 @@ bug_to_user_story_v2:
     ### Exemplo 1 (Bug Simples)
 
     Relato de Bug:
-    "Botão de adicionar ao carrinho não funciona no produto ID 1234."
+    "Busca de produtos não retorna resultados quando o termo tem acento. Buscando 'café' aparece 'nenhum resultado', mas buscando 'cafe' aparecem 12 produtos."
 
     User Story:
-    Como um cliente navegando na loja, eu quero adicionar produtos ao meu carrinho de compras, para que eu possa continuar comprando e finalizar minha compra depois.
+    Como um cliente procurando produtos na loja, eu quero encontrar resultados mesmo quando digito termos com acento, para que eu localize o que preciso sem ter que adivinhar a grafia usada no catálogo.
 
     Critérios de Aceitação:
-    - Dado que estou visualizando um produto
-    - Quando clico no botão "Adicionar ao Carrinho"
-    - Então o produto deve ser adicionado ao carrinho
-    - E devo ver uma confirmação visual
-    - E o contador do carrinho deve ser atualizado
+    - Dado que estou na página de busca de produtos
+    - Quando pesquiso um termo com acento
+    - Então devo ver os mesmos resultados da busca pelo termo sem acento
+    - E a mensagem "nenhum resultado" só deve aparecer quando não houver produtos correspondentes
+    - E o termo digitado deve ser mantido no campo de busca
 
     ---
 
-    ### Exemplo 2 (Bug Médio — Performance)
+    ### Exemplo 2 (Bug Médio — Integração)
 
     Relato de Bug:
-    "Relatório de vendas demora mais de 2 minutos para gerar quando filtro ultrapassa 1000 registros.
+    "Emails de recuperação de senha não estão sendo enviados.
 
     Detalhes:
-    - Query SQL está sem index na coluna data_venda
-    - Timeout do navegador após 120 segundos
-    - Usuários reclamando de lentidão no horário comercial"
+    - Usuário clica em 'Esqueci minha senha', informa o email e vê a mensagem 'Email enviado'
+    - O email nunca chega
+    - Logs do worker de emails: SMTP 535 Authentication failed
+    - Fila de emails com 3.200 mensagens pendentes
+    - Suporte recebendo chamados de usuários sem acesso à conta"
 
     User Story:
-    Como um gerente de vendas, eu quero gerar relatórios de vendas rapidamente mesmo com grandes volumes de dados, para que eu possa analisar informações sem esperar longos períodos.
+    Como um usuário que esqueceu a senha, eu quero receber o email de recuperação após solicitá-lo, para que eu consiga voltar a acessar minha conta sem depender do suporte.
 
     Critérios de Aceitação:
-    - Dado que solicito um relatório com mais de 1000 registros
-    - Quando aplico filtros e clico em "Gerar Relatório"
-    - Então o relatório deve ser gerado em menos de 30 segundos
-    - E não deve ocorrer timeout no navegador
-    - E o desempenho deve ser consistente em horário de pico
+    - Dado que informei um email cadastrado na tela de recuperação de senha
+    - Quando clico em "Esqueci minha senha"
+    - Então devo receber o email de recuperação em até 5 minutos
+    - E a mensagem "Email enviado" só deve ser exibida quando o envio for aceito pelo servidor de email
+    - E, se o envio falhar, devo ver uma mensagem orientando a tentar novamente
+    - E as mensagens pendentes na fila devem ser processadas após a correção
+    - E cada falha de envio deve ser registrada em log para auditoria
 
     Contexto Técnico:
-    - Problema identificado: falta de índice na coluna data_venda
-    - Performance atual: >120s para 1000+ registros
-    - Performance esperada: <30s para qualquer volume
-    - Sugestão: adicionar índice e otimizar query SQL
+    - Erro atual: SMTP 535 Authentication failed no worker de emails
+    - Fila de emails com 3.200 mensagens pendentes
+    - A interface confirma o envio mesmo quando ele falha
+    - Impacto: aumento de chamados no suporte por usuários sem acesso
+    - Sugestão: corrigir as credenciais SMTP do worker e reprocessar a fila pendente
 
     ---
 
-    ### Exemplo 3 (Bug Médio — Segurança)
+    ### Exemplo 3 (Bug Complexo — múltiplos problemas)
 
     Relato de Bug:
-    "Endpoint /api/users/:id retorna dados de qualquer usuário sem validar permissões.
+    "Agenda online da clínica com várias falhas.
 
-    Exemplo:
-    - Usuário comum (ID 100) consegue acessar GET /api/users/1 (admin)
-    - Recebe email, telefone, endereço do admin
-    - Apenas admins deveriam ver dados de outros usuários
+    PROBLEMAS:
+    1. AGENDAMENTO DUPLO: dois pacientes conseguem reservar o mesmo horário com o mesmo médico quando confirmam quase ao mesmo tempo. 23 conflitos registrados no último mês.
+    2. LEMBRETE COM HORÁRIO ERRADO: o SMS de lembrete mostra a consulta 3 horas mais tarde. O horário é salvo em UTC e enviado sem conversão para o fuso America/Sao_Paulo.
+    3. CANCELAMENTO NÃO LIBERA HORÁRIO: quando o paciente cancela pelo app, o horário continua aparecendo como ocupado para outros pacientes.
 
-    Severidade: ALTA - vazamento de dados pessoais"
+    IMPACTO: pacientes chegando em horários errados, médicos com agenda ociosa e reclamações no atendimento."
 
     User Story:
-    Como o sistema, eu quero validar permissões antes de retornar dados de usuários, para que apenas usuários autorizados possam acessar informações pessoais de outros usuários.
+    Como um paciente da clínica, eu quero agendar, ser lembrado e cancelar consultas com informações corretas, para que eu compareça no horário certo e não perca vagas por falhas da agenda.
 
-    Critérios de Aceitação:
-    - Dado que sou um usuário comum
-    - Quando tento acessar GET /api/users/:id de outro usuário
-    - Então devo receber HTTP 403 Forbidden
-    - E apenas devo poder acessar meus próprios dados
-    - E administradores devem poder acessar dados de todos
+    === USER STORY PRINCIPAL ===
 
-    Critérios Adicionais para Admins:
-    - Dado que sou um administrador
-    - Quando acesso GET /api/users/:id de qualquer usuário
-    - Então devo receber os dados completos com HTTP 200
-    - E o acesso deve ser registrado em log de auditoria
+    Título: Agenda online confiável para agendamento, lembrete e cancelamento de consultas
 
-    Contexto de Segurança:
-    - Severidade: ALTA
-    - Tipo: Quebra de controle de acesso (OWASP A01:2021)
-    - Dados expostos: email, telefone, endereço
-    - Ação: Implementar middleware de autorização
+    Descrição:
+    Como um paciente que usa a agenda online, eu quero que cada horário seja reservado para uma única pessoa, que o lembrete mostre o horário local correto e que cancelamentos liberem a vaga, para que a agenda reflita a disponibilidade real dos médicos.
+
+    === CRITÉRIOS DE ACEITAÇÃO ===
+
+    A. Agendamento - Sem reservas duplicadas:
+    - Dado que dois pacientes tentam reservar o mesmo horário com o mesmo médico
+    - Quando ambos confirmam quase ao mesmo tempo
+    - Então apenas o primeiro agendamento deve ser confirmado
+    - E o segundo paciente deve ver uma mensagem informando que o horário não está mais disponível
+
+    B. Lembrete - Horário local correto:
+    - Dado que tenho uma consulta agendada
+    - Quando recebo o SMS de lembrete
+    - Então o horário exibido deve estar no fuso America/Sao_Paulo
+    - E deve corresponder ao horário mostrado no app
+
+    C. Cancelamento - Liberação do horário:
+    - Dado que cancelei uma consulta pelo app
+    - Quando outro paciente consulta a agenda do mesmo médico
+    - Então o horário cancelado deve aparecer como disponível
+    - E deve poder ser reservado normalmente
+
+    === CRITÉRIOS TÉCNICOS ===
+    - Agendamento: impedir que duas reservas sejam gravadas para o mesmo médico e horário
+    - Lembrete: converter o horário salvo em UTC para America/Sao_Paulo antes do envio do SMS
+    - Cancelamento: atualizar a disponibilidade da agenda no mesmo fluxo do cancelamento
+
+    === CONTEXTO DO BUG ===
+    - Problemas: agendamento duplo (23 conflitos no último mês), lembrete com 3 horas de diferença, cancelamento sem liberação de horário
+    - Impacto: pacientes em horários errados, agenda ociosa e reclamações no atendimento
+
+    === TASKS TÉCNICAS SUGERIDAS ===
+    1. Adicionar restrição de unicidade para médico + horário na gravação do agendamento
+    2. Corrigir a conversão de fuso horário no envio do SMS de lembrete
+    3. Liberar o horário na agenda ao processar o cancelamento pelo app
+    4. Criar testes para confirmações simultâneas, conversão de fuso e cancelamento
 
     ---
 
@@ -218,7 +265,7 @@ bug_to_user_story_v2:
     Gere a User Story correspondente.
 
   # Metadados
-  version: "v2.4"
+  version: "v2.5"
   created_at: "2025-01-15"
   updated_at: "2026-10-01"
   tags: ["bug-analysis", "user-story", "product-management", "bdd"]
