@@ -21,6 +21,8 @@ bug_to_user_story_v2:
     Passo 2 — Identificar a persona impactada:
       - Quem sofre com o bug? (cliente, administrador, vendedor, usuário de app, o próprio sistema, etc.)
       - Seja específico: "cliente usando Safari", "gerente de vendas", "usuário do app Android", "sistema de e-commerce".
+      - Escolha um único papel, coerente com a tela ou função do relato (ex: dashboard de gestão de usuários → "administrador"); nunca use "X ou Y".
+      - Se o defeito está em uma integração ou processamento interno, sem ação direta do usuário (webhook, validação de estoque, sincronização, controle de acesso), use "o sistema" ou "o sistema de <domínio>".
 
     Passo 3 — Extrair a ação desejada:
       - O que essa persona QUER fazer que o bug impede?
@@ -39,71 +41,76 @@ bug_to_user_story_v2:
       - Se o bug é simples e sem detalhes técnicos → NÃO inclua contexto técnico.
 
     ## Formato de Saída:
+    Nos modelos abaixo, o texto entre < > indica o que deve ser preenchido; não copie os sinais < > na resposta.
 
     ### Para bugs SIMPLES:
-    ```
-    Como um [persona específica], eu quero [ação/funcionalidade], para que [benefício/valor].
+
+    Como um <persona específica>, eu quero <ação/funcionalidade>, para que <benefício/valor>.
 
     Critérios de Aceitação:
-    - Dado que [contexto]
-    - Quando [ação]
-    - Então [resultado esperado]
-    - E [resultado adicional]
-    - E [resultado adicional]
-    ```
+    - Dado que <contexto>
+    - Quando <ação>
+    - Então <resultado esperado>
+    - E <resultado adicional>
+    - E <resultado adicional>
 
     ### Para bugs MÉDIOS:
-    ```
-    Como um [persona específica], eu quero [ação/funcionalidade], para que [benefício/valor].
+
+    Como um <persona específica>, eu quero <ação/funcionalidade>, para que <benefício/valor>.
 
     Critérios de Aceitação:
-    - Dado que [contexto]
-    - Quando [ação]
-    - Então [resultado esperado]
-    - E [resultado adicional]
-    - E [resultado adicional]
-    - E [resultado adicional]
+    - Dado que <contexto>
+    - Quando <ação>
+    - Então <resultado esperado>
+    - E <resultado adicional>
+    - E <resultado adicional>
+    - E <resultado adicional>
+
+    Critérios Técnicos: (somente quando houver requisitos de implementação)
+    - <requisito técnico>
 
     Contexto Técnico:
-    - [detalhe técnico relevante extraído do bug]
-    - [detalhe técnico relevante extraído do bug]
-    - [detalhe técnico relevante extraído do bug]
-    ```
+    - <detalhe técnico relevante extraído do bug>
+    - <detalhe técnico relevante extraído do bug>
+    - Sugestão: <correção para a causa relatada, quando houver>
 
     ### Para bugs COMPLEXOS:
-    ```
-    Como um [persona específica], eu quero [ação/funcionalidade], para que [benefício/valor].
+
+    Como um <persona específica>, eu quero <objetivo geral>, para que <benefício/valor>.
 
     === USER STORY PRINCIPAL ===
 
-    Título: [título descritivo]
+    Título: <título descritivo>
 
     Descrição:
-    Como um [persona], eu quero [ação], para que [benefício].
+    Como um <persona descrita de forma mais específica que na primeira linha>, eu quero <ação detalhada cobrindo os problemas do relato>, para que <benefício>.
+    (A Descrição deve detalhar a primeira linha com outras palavras, não repeti-la.)
 
     === CRITÉRIOS DE ACEITAÇÃO ===
 
-    [Seção A - tema]:
-    - Dado que [contexto]
-    - Quando [ação]
-    - Então [resultado]
-    - E [adicional]
+    A. <Tema do problema 1> - <resultado esperado>:
+    - Dado que <contexto>
+    - Quando <ação>
+    - Então <resultado>
+    - E <adicional>
 
-    [Seção B - tema]:
-    - Dado que [contexto]
-    - Quando [ação]
-    - Então [resultado]
-    - E [adicional]
+    B. <Tema do problema 2> - <resultado esperado>:
+    - Dado que <contexto>
+    - Quando <ação>
+    - Então <resultado>
+    - E <adicional>
+
+    (Crie uma seção A, B, C... para cada problema do relato.)
 
     === CRITÉRIOS TÉCNICOS ===
-    [Detalhes de implementação organizados por área]
+    - <requisitos de implementação organizados por problema>
 
     === CONTEXTO DO BUG ===
-    [Severidade, impacto, problemas identificados]
+    - <severidade, impacto e problemas identificados>
 
     === TASKS TÉCNICAS SUGERIDAS ===
-    [Lista numerada de tasks]
-    ```
+    1. <task>
+    2. <task>
 
     ## Regras:
     - SEMPRE use "Critérios de Aceitação:" (não "Critérios de Aceite").
@@ -112,7 +119,8 @@ bug_to_user_story_v2:
     - Foque no valor para o usuário, não na solução técnica, na User Story principal.
     - Adapte o nível de detalhe à complexidade do bug.
     - Preserve informações técnicas relevantes em seção separada quando aplicável.
-    - Extraia termos técnicos, nomes de botões e mensagens de erro específicas diretamente do relato do bug para compor os Critérios de Aceitação
+    - Use nos critérios os termos que identificam o comportamento: endpoints, códigos HTTP, nomes de campos, botões, telas, mensagens de erro e limites citados no relato.
+    - Generalize os dados circunstanciais do relato: IDs de registros, valores de exemplo e contagens observadas descrevem a ocorrência, não a regra (ex: "mostra 50 mas há 42" → "a contagem deve corresponder ao total real de usuários ativos"; "produto ID 1234" → "um produto"). Em bugs médios e complexos, esses valores podem aparecer no contexto técnico.
     - Separe FATOS de REQUISITOS:
       - Fatos (estado atual, números observados, causas, tecnologias e ferramentas em uso): use somente o que está no relato. Nunca invente volumes, quantidades de usuários, bibliotecas ou arquiteturas.
       - Requisitos (comportamento esperado após a correção): devem ser concretos e verificáveis. Não use expressões vagas como "dentro do tempo esperado" ou "sem lentidão".
@@ -265,7 +273,7 @@ bug_to_user_story_v2:
     Gere a User Story correspondente.
 
   # Metadados
-  version: "v2.5"
+  version: "v2.6"
   created_at: "2025-01-15"
   updated_at: "2026-10-01"
   tags: ["bug-analysis", "user-story", "product-management", "bdd"]
