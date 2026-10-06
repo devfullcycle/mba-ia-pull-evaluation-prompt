@@ -158,7 +158,7 @@ def build_target(prompt_template: ChatPromptTemplate, llm: Any):
 
     def target(inputs: dict) -> dict:
         response = chain.invoke(inputs)
-        return {"answer": response.content}
+        return {"answer": response.text}
 
     return target
 
