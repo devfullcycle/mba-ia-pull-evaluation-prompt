@@ -127,7 +127,7 @@ NÃO adicione nenhum texto antes ou depois do JSON.
     try:
         llm = get_evaluator_llm()
         response = llm.invoke([HumanMessage(content=evaluator_prompt)])
-        result = extract_json_from_response(response.content)
+        result = extract_json_from_response(response.text)
 
         precision = float(result.get("precision", 0.0))
         recall = float(result.get("recall", 0.0))
@@ -224,7 +224,7 @@ NÃO adicione nenhum texto antes ou depois do JSON.
     try:
         llm = get_evaluator_llm()
         response = llm.invoke([HumanMessage(content=evaluator_prompt)])
-        result = extract_json_from_response(response.content)
+        result = extract_json_from_response(response.text)
 
         score = float(result.get("score", 0.0))
 
@@ -311,7 +311,7 @@ NÃO adicione nenhum texto antes ou depois do JSON.
     try:
         llm = get_evaluator_llm()
         response = llm.invoke([HumanMessage(content=evaluator_prompt)])
-        result = extract_json_from_response(response.content)
+        result = extract_json_from_response(response.text)
 
         score = float(result.get("score", 0.0))
 
@@ -396,7 +396,7 @@ NÃO adicione nenhum texto antes ou depois do JSON.
     try:
         llm = get_evaluator_llm()
         response = llm.invoke([HumanMessage(content=evaluator_prompt)])
-        result = extract_json_from_response(response.content)
+        result = extract_json_from_response(response.text)
 
         score = float(result.get("score", 0.0))
 
@@ -484,7 +484,7 @@ NÃO adicione nenhum texto antes ou depois do JSON.
     try:
         llm = get_evaluator_llm()
         response = llm.invoke([HumanMessage(content=evaluator_prompt)])
-        result = extract_json_from_response(response.content)
+        result = extract_json_from_response(response.text)
 
         score = float(result.get("score", 0.0))
 
@@ -574,7 +574,7 @@ NÃO adicione nenhum texto antes ou depois do JSON.
     try:
         llm = get_evaluator_llm()
         response = llm.invoke([HumanMessage(content=evaluator_prompt)])
-        result = extract_json_from_response(response.content)
+        result = extract_json_from_response(response.text)
 
         score = float(result.get("score", 0.0))
 
@@ -674,7 +674,7 @@ NÃO adicione nenhum texto antes ou depois do JSON.
     try:
         llm = get_evaluator_llm()
         response = llm.invoke([HumanMessage(content=evaluator_prompt)])
-        result = extract_json_from_response(response.content)
+        result = extract_json_from_response(response.text)
 
         score = float(result.get("score", 0.0))
 
