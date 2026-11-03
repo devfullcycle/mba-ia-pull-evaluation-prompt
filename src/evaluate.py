@@ -20,11 +20,13 @@ Configure o provider no arquivo .env através da variável LLM_PROVIDER.
 import os
 import sys
 import json
+import time
 import argparse
 from typing import List, Dict, Any
 from pathlib import Path
 from dotenv import load_dotenv
 from langsmith import Client
+from langsmith.evaluation import evaluate
 from langchain import hub
 from langchain_core.prompts import ChatPromptTemplate
 from utils import check_env_vars, format_score, print_section_header, get_llm as get_configured_llm
@@ -182,48 +184,97 @@ def evaluate_prompt_on_example(
 def evaluate_prompt(
     prompt_name: str,
     dataset_name: str,
-    client: Client
+    client: Client,
+    waiting_mode: bool = False
 ) -> Dict[str, float]:
     print(f"\n🔍 Avaliando: {prompt_name}")
 
     try:
         prompt_template = pull_prompt_from_langsmith(prompt_name)
-
-        examples = list(client.list_examples(dataset_name=dataset_name))
-        print(f"   Dataset: {len(examples)} exemplos")
-
         llm = get_llm()
+        chain = prompt_template | llm
 
-        f1_scores = []
-        clarity_scores = []
-        precision_scores = []
+        def target_with_delay(inputs):
+            if waiting_mode:
+                print(f"      [Quota] Aguardando 10s antes da chamada ao LLM...")
+                time.sleep(10)
+            return chain.invoke(inputs)
 
-        print("   Avaliando exemplos...")
+        # Wrappers para adaptar as métricas locais ao formato do LangSmith evaluate()
+        def langsmith_f1(run, example):
+            if waiting_mode:
+                print(f"      [Quota] Aguardando 10s antes de avaliar F1...")
+                time.sleep(10)
+            bug_report = run.inputs.get("bug_report", "")
+            reference = example.outputs.get("reference", "")
+            res = evaluate_f1_score(bug_report, run.outputs["output"].content, reference)
+            return {"key": "f1_score", "score": res["score"], "comment": res["reasoning"]}
 
-        for i, example in enumerate(examples[:10], 1):
-            result = evaluate_prompt_on_example(prompt_template, example, llm)
+        def langsmith_clarity(run, example):
+            if waiting_mode:
+                print(f"      [Quota] Aguardando 10s antes de avaliar Clarity...")
+                time.sleep(10)
+            bug_report = run.inputs.get("bug_report", "")
+            reference = example.outputs.get("reference", "")
+            res = evaluate_clarity(bug_report, run.outputs["output"].content, reference)
+            return {"key": "clarity", "score": res["score"], "comment": res["reasoning"]}
 
-            if result["answer"]:
-                f1 = evaluate_f1_score(result["question"], result["answer"], result["reference"])
-                clarity = evaluate_clarity(result["question"], result["answer"], result["reference"])
-                precision = evaluate_precision(result["question"], result["answer"], result["reference"])
+        def langsmith_precision(run, example):
+            if waiting_mode:
+                print(f"      [Quota] Aguardando 10s antes de avaliar Precision...")
+                time.sleep(10)
+            bug_report = run.inputs.get("bug_report", "")
+            reference = example.outputs.get("reference", "")
+            res = evaluate_precision(bug_report, run.outputs["output"].content, reference)
+            return {"key": "precision", "score": res["score"], "comment": res["reasoning"]}
 
-                f1_scores.append(f1["score"])
-                clarity_scores.append(clarity["score"])
-                precision_scores.append(precision["score"])
+        print(f"   Iniciando experimento no LangSmith...")
+        
+        results = evaluate(
+            target_with_delay,
+            data=dataset_name,
+            evaluators=[langsmith_f1, langsmith_clarity, langsmith_precision],
+            experiment_prefix=f"eval-{prompt_name}",
+            client=client,
+            max_concurrency=1
+        )
 
-                print(f"      [{i}/{min(10, len(examples))}] F1:{f1['score']:.2f} Clarity:{clarity['score']:.2f} Precision:{precision['score']:.2f}")
+        # Extrair médias do experimento a partir dos resultados retornados pelo LangSmith.
+        # Não chamamos a LLM novamente: usamos apenas os dados já gerados pelo evaluate().
+        score_buckets = {"f1_score": [], "clarity": [], "precision": []}
 
-        avg_f1 = sum(f1_scores) / len(f1_scores) if f1_scores else 0.0
-        avg_clarity = sum(clarity_scores) / len(clarity_scores) if clarity_scores else 0.0
-        avg_precision = sum(precision_scores) / len(precision_scores) if precision_scores else 0.0
+        for row in results:
+            evaluation_results = row["evaluation_results"]
+            if isinstance(evaluation_results, dict):
+                evaluation_results = evaluation_results.get("results", [])
 
-        avg_helpfulness = (avg_clarity + avg_precision) / 2
-        avg_correctness = (avg_f1 + avg_precision) / 2
+            for item in evaluation_results or []:
+                key = item.get("key") if isinstance(item, dict) else getattr(item, "key", None)
+                score = item.get("score", 0.0) if isinstance(item, dict) else getattr(item, "score", 0.0)
+                if key in score_buckets and score is not None:
+                    score_buckets[key].append(score)
+
+        avg_f1 = (
+            sum(score_buckets["f1_score"]) / len(score_buckets["f1_score"])
+            if score_buckets["f1_score"]
+            else 0.0
+        )
+        avg_clarity = (
+            sum(score_buckets["clarity"]) / len(score_buckets["clarity"])
+            if score_buckets["clarity"]
+            else 0.0
+        )
+        avg_precision = (
+            sum(score_buckets["precision"]) / len(score_buckets["precision"])
+            if score_buckets["precision"]
+            else 0.0
+        )
+
+        print(f"   ✓ Resultado agregado: f1={avg_f1:.4f}, clarity={avg_clarity:.4f}, precision={avg_precision:.4f}")
 
         return {
-            "helpfulness": round(avg_helpfulness, 4),
-            "correctness": round(avg_correctness, 4),
+            "helpfulness": round((avg_clarity + avg_precision) / 2, 4),
+            "correctness": round((avg_f1 + avg_precision) / 2, 4),
             "f1_score": round(avg_f1, 4),
             "clarity": round(avg_clarity, 4),
             "precision": round(avg_precision, 4)
@@ -274,6 +325,7 @@ def display_results(prompt_name: str, scores: Dict[str, float]) -> bool:
 def main():
     parser = argparse.ArgumentParser(description="Avaliação de prompts via LangSmith")
     parser.add_argument("--original", action="store_true", help="Avaliar a versão v1 (original) em vez da v2")
+    parser.add_argument("--waiting-mode", action="store_true", help="Adiciona um atraso entre as chamadas ao LLM para evitar limites de cota")
     args = parser.parse_args()
 
     print_section_header("AVALIAÇÃO DE PROMPTS OTIMIZADOS")
@@ -326,7 +378,7 @@ def main():
         evaluated_count += 1
 
         try:
-            scores = evaluate_prompt(prompt_name, dataset_name, client)
+            scores = evaluate_prompt(prompt_name, dataset_name, client, waiting_mode=args.waiting_mode)
 
             passed = display_results(prompt_name, scores)
             all_passed = all_passed and passed
