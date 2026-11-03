@@ -20,6 +20,8 @@ Configure o provider no arquivo .env através da variável LLM_PROVIDER.
 import os
 import sys
 import json
+import time
+import argparse
 from typing import List, Dict, Any
 from pathlib import Path
 from dotenv import load_dotenv
@@ -147,7 +149,7 @@ def pull_prompt_from_langsmith(client: Client, prompt_name: str) -> ChatPromptTe
         raise
 
 
-def build_target(prompt_template: ChatPromptTemplate, llm: Any):
+def build_target(prompt_template: ChatPromptTemplate, llm: Any, waiting_mode: bool = False):
     """
     Monta a função que o LangSmith executa para cada exemplo do dataset.
 
@@ -157,6 +159,9 @@ def build_target(prompt_template: ChatPromptTemplate, llm: Any):
     chain = prompt_template | llm
 
     def target(inputs: dict) -> dict:
+        if waiting_mode:
+            print("      [Quota] Aguardando 10s antes da chamada ao LLM...")
+            time.sleep(10)
         response = chain.invoke(inputs)
         return {"answer": response.text}
 
@@ -213,7 +218,20 @@ def evaluate_all_metrics(inputs: dict, outputs: dict, reference_outputs: dict) -
     }
 
 
-def run_experiment(client: Client, prompt_name: str, dataset_name: str):
+def _evaluator_with_delay(waiting_mode: bool):
+    """Envolve evaluate_all_metrics com a pausa do --waiting-mode, se ativo."""
+    if not waiting_mode:
+        return evaluate_all_metrics
+
+    def evaluator(inputs: dict, outputs: dict, reference_outputs: dict) -> Dict[str, Any]:
+        print("      [Quota] Aguardando 10s antes de avaliar...")
+        time.sleep(10)
+        return evaluate_all_metrics(inputs, outputs, reference_outputs)
+
+    return evaluator
+
+
+def run_experiment(client: Client, prompt_name: str, dataset_name: str, waiting_mode: bool = False):
     """
     Executa o prompt contra o dataset como um experimento do LangSmith.
 
@@ -227,9 +245,9 @@ def run_experiment(client: Client, prompt_name: str, dataset_name: str):
     print("   Rodando experimento no LangSmith...")
 
     results = client.evaluate(
-        build_target(prompt_template, llm),
+        build_target(prompt_template, llm, waiting_mode=waiting_mode),
         data=dataset_name,
-        evaluators=[evaluate_all_metrics],
+        evaluators=[_evaluator_with_delay(waiting_mode)],
         experiment_prefix=prompt_name.replace("/", "-"),
         # Sequencial de propósito: os planos gratuitos de LLM costumam ter limite
         # baixo de requisições por minuto. Se o seu limite permitir, suba esse valor.
@@ -303,6 +321,11 @@ def display_results(prompt_name: str, scores: Dict[str, float]) -> bool:
 
 
 def main():
+    parser = argparse.ArgumentParser(description="Avaliação de prompts via LangSmith")
+    parser.add_argument("--original", action="store_true", help="Avaliar a versão v1 (original) em vez da v2")
+    parser.add_argument("--waiting-mode", action="store_true", help="Adiciona um atraso entre as chamadas ao LLM para evitar limites de cota")
+    args = parser.parse_args()
+
     print_section_header("AVALIAÇÃO DE PROMPTS OTIMIZADOS")
 
     provider = os.getenv("LLM_PROVIDER", "")
@@ -350,8 +373,9 @@ def main():
     print("Certifique-se de ter feito push dos prompts antes de avaliar:")
     print("  python src/push_prompts.py\n")
 
+    version = "v1" if args.original else "v2"
     prompts_to_evaluate = [
-        f"{username}/bug_to_user_story_v2",
+        f"{username}/bug_to_user_story_{version}",
     ]
 
     all_passed = True
@@ -359,7 +383,7 @@ def main():
 
     for prompt_name in prompts_to_evaluate:
         try:
-            scores, experiment_url = run_experiment(client, prompt_name, dataset_name)
+            scores, experiment_url = run_experiment(client, prompt_name, dataset_name, waiting_mode=args.waiting_mode)
             passed = display_results(prompt_name, scores)
             all_passed = all_passed and passed
 

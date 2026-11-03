@@ -140,7 +140,7 @@ def validate_prompt_structure(prompt_data: Dict[str, Any]) -> tuple[bool, list]:
     if 'TODO' in system_prompt:
         errors.append("system_prompt ainda contém TODOs")
 
-    techniques = prompt_data.get('techniques_applied', [])
+    techniques = prompt_data.get('techniques', [])
     if len(techniques) < 2:
         errors.append(f"Mínimo de 2 técnicas requeridas, encontradas: {len(techniques)}")
 
