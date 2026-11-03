@@ -87,7 +87,7 @@ def check_env_vars(required_vars: list) -> bool:
     return True
 
 
-def format_score(score: float, threshold: float = 0.9) -> str:
+def format_score(score: float, threshold: float = 0.8) -> str:
     """
     Formata score com indicador visual de aprovação.
 
@@ -188,7 +188,16 @@ def get_llm(model: Optional[str] = None, temperature: float = 0.0):
         ValueError: Se provider não for suportado ou API key não configurada
     """
     provider = os.getenv('LLM_PROVIDER', 'openai').lower()
-    model_name = model or os.getenv('LLM_MODEL', 'gpt-4o-mini')
+    model_name = model or os.getenv('LLM_MODEL', '')
+
+    if not model_name:
+        raise ValueError(
+            "Nenhum modelo definido.\n"
+            "Preencha LLM_MODEL (e EVAL_MODEL) no .env com um modelo disponível\n"
+            "na documentação oficial do provider escolhido:\n"
+            "  Google -> https://ai.google.dev/gemini-api/docs/models\n"
+            "  OpenAI -> https://platform.openai.com/docs/models"
+        )
 
     if provider == 'openai':
         from langchain_openai import ChatOpenAI
@@ -239,5 +248,5 @@ def get_eval_llm(temperature: float = 0.0):
     Returns:
         Instância de LLM configurada para avaliação
     """
-    eval_model = os.getenv('EVAL_MODEL', 'gpt-4o')
+    eval_model = os.getenv('EVAL_MODEL', '')
     return get_llm(model=eval_model, temperature=temperature)

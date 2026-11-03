@@ -1,3 +1,8 @@
+# Este arquivo contém o prompt inicial de BAIXA QUALIDADE que você deve otimizar.
+# Os problemas são intencionais (ex: {bug_report} duplicado no system e user prompt,
+# instruções vagas, falta de exemplos, sem persona definida).
+# Use-o como base para entender o que precisa ser melhorado na v2.
+
 bug_to_user_story_v1:
   description: Prompt original extraído do LangSmith Hub
   system_prompt: 'Você é um assistente que ajuda a transformar relatos de bugs de

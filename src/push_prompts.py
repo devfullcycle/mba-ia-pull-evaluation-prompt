@@ -7,7 +7,33 @@ Este script:
 3. Faz push PÚBLICO para o LangSmith Hub
 4. Adiciona metadados (tags, descrição, técnicas utilizadas)
 
-SIMPLIFICADO: Código mais limpo e direto ao ponto.
+DICAS DE IMPLEMENTAÇÃO:
+
+- O push é feito pelo cliente do LangSmith:
+
+      from langsmith import Client
+      from langchain_core.prompts import ChatPromptTemplate
+
+      client = Client()
+      prompt = ChatPromptTemplate.from_messages([
+          ("system", system_prompt),
+          ("user", user_prompt),
+      ])
+      url = client.push_prompt(
+          f"{username}/bug_to_user_story_v2",
+          object=prompt,
+          is_public=True,
+          description="...",
+          tags=[...],
+      )
+
+- `username` vem de USERNAME_LANGSMITH_HUB no .env e precisa ser o seu handle
+  do Hub. Se você ainda não tem um handle, veja as instruções no .env.example.
+
+- A variável do template precisa ser {bug_report}, que é a chave de entrada
+  usada no dataset de avaliação.
+
+- Use `load_yaml` de utils.py para ler o arquivo .yml.
 """
 
 import os

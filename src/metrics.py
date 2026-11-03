@@ -1,6 +1,5 @@
 """
-Implementação COMPLETA de métricas customizadas para avaliação de prompts.
-RESOLUÇÃO DO DESAFIO
+Módulo de métricas customizadas para avaliação de prompts.
 
 Este módulo implementa métricas gerais e específicas para Bug to User Story:
 
@@ -15,11 +14,9 @@ MÉTRICAS ESPECÍFICAS PARA BUG TO USER STORY (4):
 6. User Story Format Score: Formato correto (Como... Eu quero... Para que...)
 7. Completeness Score: Completude e contexto técnico
 
-Suporta múltiplos providers de LLM:
-- OpenAI (gpt-4o, gpt-4o-mini)
-- Google Gemini (gemini-1.5-flash, gemini-1.5-pro)
-
-Configure o provider no arquivo .env através da variável LLM_PROVIDER.
+Suporta múltiplos providers de LLM: OpenAI e Google Gemini.
+Configure o provider em LLM_PROVIDER e os modelos em LLM_MODEL / EVAL_MODEL,
+no arquivo .env, consultando a documentação oficial do provider escolhido.
 """
 
 import os
@@ -130,7 +127,7 @@ NÃO adicione nenhum texto antes ou depois do JSON.
     try:
         llm = get_evaluator_llm()
         response = llm.invoke([HumanMessage(content=evaluator_prompt)])
-        result = extract_json_from_response(response.content)
+        result = extract_json_from_response(response.text)
 
         precision = float(result.get("precision", 0.0))
         recall = float(result.get("recall", 0.0))
@@ -227,7 +224,7 @@ NÃO adicione nenhum texto antes ou depois do JSON.
     try:
         llm = get_evaluator_llm()
         response = llm.invoke([HumanMessage(content=evaluator_prompt)])
-        result = extract_json_from_response(response.content)
+        result = extract_json_from_response(response.text)
 
         score = float(result.get("score", 0.0))
 
@@ -314,7 +311,7 @@ NÃO adicione nenhum texto antes ou depois do JSON.
     try:
         llm = get_evaluator_llm()
         response = llm.invoke([HumanMessage(content=evaluator_prompt)])
-        result = extract_json_from_response(response.content)
+        result = extract_json_from_response(response.text)
 
         score = float(result.get("score", 0.0))
 
@@ -399,7 +396,7 @@ NÃO adicione nenhum texto antes ou depois do JSON.
     try:
         llm = get_evaluator_llm()
         response = llm.invoke([HumanMessage(content=evaluator_prompt)])
-        result = extract_json_from_response(response.content)
+        result = extract_json_from_response(response.text)
 
         score = float(result.get("score", 0.0))
 
@@ -487,7 +484,7 @@ NÃO adicione nenhum texto antes ou depois do JSON.
     try:
         llm = get_evaluator_llm()
         response = llm.invoke([HumanMessage(content=evaluator_prompt)])
-        result = extract_json_from_response(response.content)
+        result = extract_json_from_response(response.text)
 
         score = float(result.get("score", 0.0))
 
@@ -577,7 +574,7 @@ NÃO adicione nenhum texto antes ou depois do JSON.
     try:
         llm = get_evaluator_llm()
         response = llm.invoke([HumanMessage(content=evaluator_prompt)])
-        result = extract_json_from_response(response.content)
+        result = extract_json_from_response(response.text)
 
         score = float(result.get("score", 0.0))
 
@@ -677,7 +674,7 @@ NÃO adicione nenhum texto antes ou depois do JSON.
     try:
         llm = get_evaluator_llm()
         response = llm.invoke([HumanMessage(content=evaluator_prompt)])
-        result = extract_json_from_response(response.content)
+        result = extract_json_from_response(response.text)
 
         score = float(result.get("score", 0.0))
 
@@ -698,7 +695,7 @@ NÃO adicione nenhum texto antes ou depois do JSON.
 if __name__ == "__main__":
     # Mostrar provider configurado
     provider = os.getenv("LLM_PROVIDER", "openai")
-    eval_model = os.getenv("EVAL_MODEL", "gpt-4o")
+    eval_model = os.getenv("EVAL_MODEL", "(não definido)")
 
     print("=" * 70)
     print("TESTANDO MÉTRICAS CUSTOMIZADAS")
